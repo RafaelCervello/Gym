@@ -1,0 +1,508 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gym</title>
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+<div id="app"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+
+<script>
+const {useState,useEffect,useRef}=React;
+const C={bg:"#0a0a0a",card:"#1a1a1a",border:"#2a2a2a",orange:"#e8e8e8",orangeD:"#505050",text:"#f5f5f5",muted:"#888",dim:"#444",green:"#4caf50",tab:"#252527",tabA:"#e8e8e8"};
+
+const PLANS=[
+{id:"p1",name:"ABCDE",sub:"Ênfase Membros Superiores",freq:"5× semana",icon:"💪",sched:"Seg→A | Ter→B | Qua→C | Qui→✗ | Sex→D | Sáb→E",days:[
+{id:"a",label:"A",title:"Treino A",muscles:"Peito • Ombros • Tríceps",ex:[
+{id:"1",n:"Supino inclinado c/ halteres ou máquina",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Supino reto c/ halteres ou máquina",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Supino declinado barra ou máquina",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"4",n:"Voador — 2s pico de contração",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×10-15 (1min) ⚡ 1 dropset na última"},
+{id:"5",n:"Elevação frontal",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"6",n:"Elevação lateral sentado c/ halteres",d:"Ajuste: 1-2×4-6 (1min) | Trabalho: 2×8-12 (1min) ⚡ 1 dropset na última"},
+{id:"7",n:"Tríceps francês na corda",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 3×6-10 (2min)"}
+]},
+{id:"b",label:"B",title:"Treino B",muscles:"Costas • Bíceps",ex:[
+{id:"1",n:"Remada curvada c/ barra — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Remada baixa triângulo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Remada baixa pegada aberta — 2s pico",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"4",n:"Pulley frente triângulo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×8-12 (2min) ⚡ 1 dropset na última"},
+{id:"5",n:"Meio Terra",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"6",n:"Hiperextensão no banco romano",d:"Trabalho: 3×10-15 (90s)"},
+{id:"7",n:"Rosca scott máquina — 2s pico",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 3×6-10 (2min)"}
+]},
+{id:"c",label:"C",title:"Treino C",muscles:"Membros Inferiores",ex:[
+{id:"1",n:"Agachamento livre",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Leg 45",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×8-12 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Extensor — 2s pico de contração",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×10-15 (1min)"},
+{id:"4",n:"Flexor deitado — 2s pico",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"5",n:"Stiff",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×8-10 (2-3min)"},
+{id:"6",n:"Elevação de quadril — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 1 dropset na última"},
+{id:"7",n:"Panturrilha em pé na máquina ou smith — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×10-15 (2min)"}
+]},
+{id:"d",label:"D",title:"Treino D",muscles:"Ombros • Est. Peito • Tríceps",ex:[
+{id:"1",n:"Desenvolvimento com halteres",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Elevação frontal",d:"Ajuste: 1-2×4-6 (1min) | Trabalho: 2×10-15 (1min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Elevação lateral sentado c/ halteres",d:"Ajuste: 1-2×4-6 (1min) | Trabalho: 2×8-12 (1min)"},
+{id:"4",n:"Elevação lateral máquina ou unilateral no cabo",d:"Ajuste: 1×4-6 (1min) | Trabalho: 2×8-12 (1min) ⚡ 1 dropset na última"},
+{id:"5",n:"Voador — 2s pico de contração",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×6-10 (2-3min)"},
+{id:"6",n:"Tríceps corda — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×6-10 (2min)"},
+{id:"7",n:"Tríceps testa corda banco 35°",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×8-12 (2min) ⚡ 2 rest pause 10s na última"}
+]},
+{id:"e",label:"E",title:"Treino E",muscles:"Bíceps • Costas • Abdômen",ex:[
+{id:"1",n:"Rosca direta cabo — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Rosca scott máquina ou cabo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×8-12 (2min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Rosca direta corda",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×10-15 (1min) ⚡ 1 dropset na última"},
+{id:"4",n:"Pulley frente aberto — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×8-12 (2min)"},
+{id:"5",n:"Pulley frente triângulo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×8-12 (2min) ⚡ 1 dropset na última"},
+{id:"6",n:"Serrote — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"7",n:"Abdominal infra na torre — 2s pico",d:"3×RM — intervalo 45s entre séries, 1min entre exercício"},
+{id:"8",n:"Abdominal supra na prancha declinada",d:"3×RM — intervalo 45s entre séries"}
+]}
+]},
+
+{id:"p2",name:"PPL — ABC",sub:"Push · Pull · Legs",freq:"3× semana",icon:"🔄",sched:"Seg→A | Qua→B | Sex→C",days:[
+{id:"a",label:"A",title:"Treino A — Pull",muscles:"Costas • Bíceps",ex:[
+{id:"1",n:"Remada curvada c/ barra — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Remada baixa triângulo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 1×6-10 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Remada baixa pegada aberta — 2s pico",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Pulley frente triângulo — 2s pico",d:"Ajuste: 1-2×4-6 (1min) | Trabalho: 2×10-15 (2min)"},
+{id:"5",n:"Meio Terra",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"6",n:"Rosca scott máquina ou cabo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×6-10 (2min) ⚡ 2 rest pause 10s na última"},
+{id:"7",n:"Abdominal infra na torre — 2s pico",d:"3×RM (intervalo 45s/1min)"}
+]},
+{id:"b",label:"B",title:"Treino B — Push",muscles:"Peito • Ombros • Tríceps",ex:[
+{id:"1",n:"Supino inclinado c/ halteres ou máquina",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Supino reto c/ halteres ou máquina",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"3",n:"Supino declinado barra ou máquina",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Voador — 2s pico de contração",d:"Ajuste: 1-2×4-6 (1min) | Trabalho: 2×10-15 (1min) ⚡ 1 dropset na última"},
+{id:"5",n:"Elevação frontal",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"6",n:"Elevação lateral sentado c/ halteres",d:"Ajuste: 1-2×4-6 (1min) | Trabalho: 2×8-12 (1min) ⚡ 1 dropset na última"},
+{id:"7",n:"Tríceps corda — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×6-10 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"8",n:"Panturrilha máquina em pé — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×8-12 (2-3min)"}
+]},
+{id:"c",label:"C",title:"Treino C — Legs",muscles:"Membros Inferiores",ex:[
+{id:"1",n:"Extensor — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Hack machine",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Leg 45°",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 10 reps parciais após falha"},
+{id:"4",n:"Flexor deitado — 2s pico",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 1×6-10 (2-3min) ⚡ 2 rest pause"},
+{id:"5",n:"Stiff",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"6",n:"Elevação de quadril — 2s pico",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"}
+]}
+]},
+
+{id:"p4",name:"ABCDE",sub:"Ênfase Membros Inferiores",freq:"5× semana",icon:"🦵",sched:"Seg→A | Ter→B | Qua→C | Sex→D | Sáb→E",days:[
+{id:"a",label:"A",title:"Treino A",muscles:"Quadríceps • Est. Posteriores • Glúteos",ex:[
+{id:"1",n:"Agachamento livre",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10"},
+{id:"2",n:"Hack machine",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Leg 45°",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×10-15 (2-3min) ⚡ 10 reps parciais após falha"},
+{id:"4",n:"Extensora — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min) ⚡ 2 drops na última"},
+{id:"5",n:"Flexor deitado — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"6",n:"Abdutor — 2s pico",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"}
+]},
+{id:"b",label:"B",title:"Treino B",muscles:"Peito • Ombros • Tríceps",ex:[
+{id:"1",n:"Supino inclinado c/ halteres ou máquina",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Supino reto c/ halteres ou máquina",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Supino declinado barra ou máquina",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"4",n:"Voador — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×10-15 (1min) ⚡ 1 dropset na última"},
+{id:"5",n:"Elevação frontal",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"6",n:"Elevação lateral sentado c/ halteres",d:"Ajuste: 1-2×4-6 (1min) | Trabalho: 2×8-12 (1min) ⚡ 1 dropset na última"},
+{id:"7",n:"Tríceps corda — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×6-10 (2-3min) ⚡ 2 rest pause 10s na última"}
+]},
+{id:"c",label:"C",title:"Treino C",muscles:"Costas • Bíceps • Panturrilhas",ex:[
+{id:"1",n:"Remada curvada c/ barra — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Remada baixa triângulo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Remada baixa pegada aberta — 2s pico",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Pulley frente triângulo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×8-12 (2min) ⚡ 1 dropset na última"},
+{id:"5",n:"Meio Terra",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"6",n:"Hiperextensão no banco romano",d:"Trabalho: 3×10-15 (90s)"},
+{id:"7",n:"Rosca scott máquina — 2s pico",d:"Ajuste: 1×4-6 (1-2min) | Trabalho: 3×6-10 (2min)"},
+{id:"8",n:"Panturrilha em pé na máquina ou smith",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×8-12 (2-3min)"}
+]},
+{id:"d",label:"D",title:"Treino D",muscles:"Posteriores • Glúteos • Est. Quadríceps",ex:[
+{id:"1",n:"Flexor deitado — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Flexor sentado — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"3",n:"Stiff",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Elevação de quadril — 2s pico",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause"},
+{id:"5",n:"Abdutor — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"6",n:"Extensor — 2s pico",d:"Aquec: 1×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 1 dropset"}
+]},
+{id:"e",label:"E",title:"Treino E",muscles:"Upper Body • Panturrilhas",ex:[
+{id:"1",n:"Supino inclinado c/ halteres ou máquina",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Supino reto c/ halteres ou máquina",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s"},
+{id:"3",n:"Remada baixa pegada aberta — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Pulley frente triângulo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s"},
+{id:"5",n:"Desenvolvimento halteres ou máquina",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s"},
+{id:"6",n:"Rosca scott máquina ou cabo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause 10s"},
+{id:"7",n:"Tríceps francês com corda",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min) ⚡ 1 dropset na última"},
+{id:"8",n:"Panturrilha em pé na máquina ou smith",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 3×8-12 (2-3min)"}
+]}
+]},
+
+{id:"p3",name:"Push-Pull-Leg-Upper-Lower",sub:"Divisão avançada 5×",freq:"5× semana",icon:"🏋️",sched:"Seg→Pull | Ter→Push | Qua→Legs | Sex→Upper | Sáb→Lower",days:[
+{id:"pull",label:"Pull",title:"Pull — Puxar",muscles:"Costas • Bíceps",ex:[
+{id:"1",n:"Remada curvada",d:"Aquec: 1-2×10-15 | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Remada baixa pegada aberta",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"3",n:"Serrote",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Pulley frente triângulo",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"5",n:"Rosca direta cabo",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"}
+]},
+{id:"push",label:"Push",title:"Push — Empurrar",muscles:"Peito • Ombros • Tríceps",ex:[
+{id:"1",n:"Supino inclinado máquina ou halteres",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Supino reto máquina ou smith",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"3",n:"Voador",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-4min)"},
+{id:"4",n:"Elevação lateral sentado",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"5",n:"Elevação lateral máquina ou cabo unilateral",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"6",n:"Tríceps polia alta",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"}
+]},
+{id:"legs",label:"Legs",title:"Legs — Pernas",muscles:"Membros Inferiores",ex:[
+{id:"1",n:"Flexor deitado",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Agachamento Hack",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-4min)"},
+{id:"3",n:"Leg 45",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Extensor",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2min)"},
+{id:"5",n:"Stiff",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"}
+]},
+{id:"upper",label:"Upper",title:"Upper — Superior",muscles:"Corpo Superior",ex:[
+{id:"1",n:"Supino reto máquina ou smith",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Crucifixo inclinado cabo",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2min)"},
+{id:"3",n:"Pulley frente aberto",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Remada baixa triângulo",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"5",n:"Elevação lateral sentado",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2min)"},
+{id:"6",n:"Rosca direta banco 45°",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2min)"},
+{id:"7",n:"Tríceps francês com corda",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2min)"}
+]},
+{id:"lower",label:"Lower",title:"Lower — Inferior",muscles:"Membros Inferiores",ex:[
+{id:"1",n:"Flexor sentado",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Flexor deitado",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"3",n:"Elevação de quadril",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Hack",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-4min)"},
+{id:"5",n:"Leg 45",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"}
+]}
+]},
+
+{id:"p5",name:"ABCDEF",sub:"Classic Olympia — Ramon Dino",freq:"6× semana",icon:"🏆",sched:"Seg→A | Ter→B | Qua→C | Qui→✗ | Sex→D | Sáb→E | Dom→F",days:[
+{id:"a",label:"A",title:"Treino A — Costas",muscles:"Costas (1ª sessão)",ex:[
+{id:"1",n:"Remada curvada — 2s pico",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Remada baixa triângulo — 2s pico",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"3",n:"Serrote",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Pulley frente triângulo",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"5",n:"Hiperextensão no banco romano",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"6",n:"Rosca scott máquina ou scoth no cabo",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min) ⚡ 2 rest pause 10s na última"}
+]},
+{id:"b",label:"B",title:"Treino B — Peito",muscles:"Peito • Ombros • Tríceps",ex:[
+{id:"1",n:"Supino inclinado máquina ou halteres",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Supino reto máquina ou halteres",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min) ⚡ 2 rest pause na última"},
+{id:"3",n:"Supino declinado máquina / barra / cross over",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Voador",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min) ⚡ 2 drops na última"},
+{id:"5",n:"Elevação frontal com corda",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"6",n:"Elevação lateral sentado c/ halteres",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min) ⚡ 2 rest pause 10s na última"},
+{id:"7",n:"Tríceps corda",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"}
+]},
+{id:"c",label:"C",title:"Treino C — Pernas",muscles:"Membros Inferiores (1ª sessão)",ex:[
+{id:"1",n:"Panturrilhas sentada",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"2",n:"Extensor",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"3",n:"Hack machine",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×8-12 (2-3min) ⚡ 2 rest pause 10s na última"},
+{id:"4",n:"Leg 45",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×10-15 (2-3min) ⚡ 10 reps parciais após falha"},
+{id:"5",n:"Flexor sentado",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"6",n:"Adutor",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (1min)"}
+]},
+{id:"d",label:"D",title:"Treino D — Costas",muscles:"Costas (2ª sessão)",ex:[
+{id:"1",n:"Pull down com corda",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Pulley frente aberto",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"3",n:"Remada baixa pegada aberta",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Serrote",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"5",n:"Hiperextensão no banco romano",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"6",n:"Rosca direta no cabo",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min) ⚡ 2 rest pause 10s na última"}
+]},
+{id:"e",label:"E",title:"Treino E — Peito/Ombros",muscles:"Peito • Ombros (2ª sessão)",ex:[
+{id:"1",n:"Supino inclinado máquina ou halteres",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Supino reto máquina ou halteres",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"3",n:"Voador",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"4",n:"Elevação frontal com corda",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"5",n:"Elevação lateral sentado c/ halteres",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min) ⚡ 2 rest pause 10s na última"},
+{id:"6",n:"Elevação lateral unilateral cabo",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2-3min)"},
+{id:"7",n:"Paralela peso do corpo",d:"Trabalho: 3 séries — máximo repetições (2min)"}
+]},
+{id:"f",label:"F",title:"Treino F — Pernas",muscles:"Membros Inferiores (2ª sessão)",ex:[
+{id:"1",n:"Panturrilhas em pé na máquina",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"2",n:"Flexor deitado",d:"Aquec: 1-2×10-15 (1min) | Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"3",n:"Stiff",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×10-15 (2-3min)"},
+{id:"4",n:"Abdutor",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (2min)"},
+{id:"5",n:"Elevação de quadril",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×8-12 (2-3min) ⚡ 2 rest pause na última"},
+{id:"6",n:"Extensor",d:"Ajuste: 1-2×4-6 (1-2min) | Trabalho: 2×6-10 (1min)"}
+]}
+]},
+
+{id:"p6",name:"Upper & Lower",sub:"Superior-Inferior",freq:"4× semana",icon:"⬆",sched:"Seg→Upper1 | Ter→Lower1 | Qui→Upper2 | Sex→Lower2",days:[
+{id:"u1",label:"Upper 1",title:"Upper 1 — Superior 1",muscles:"Corpo Superior (foco peito)",ex:[
+{id:"1",n:"Supino inclinado máquina / halteres / smith",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Voador",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"3",n:"Pulley frente aberto",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Remada baixa triângulo",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"5",n:"Elevação lateral sentado",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"6",n:"Rosca direta banco 45°",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2min)"},
+{id:"7",n:"Tríceps francês com corda",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2min)"}
+]},
+{id:"l1",label:"Lower 1",title:"Lower 1 — Inferior 1",muscles:"Membros Inferiores (foco quad)",ex:[
+{id:"1",n:"Flexor deitado",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-4min)"},
+{id:"2",n:"Agachamento Hack",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-4min)"},
+{id:"3",n:"Leg 45",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"4",n:"Extensor",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2min)"},
+{id:"5",n:"Stiff",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"}
+]},
+{id:"u2",label:"Upper 2",title:"Upper 2 — Superior 2",muscles:"Corpo Superior (foco costas)",ex:[
+{id:"1",n:"Supino reto máquina / halteres / smith",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Cross over",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"3",n:"Remada curvada",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-4min)"},
+{id:"4",n:"Pulley frente triângulo",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"5",n:"Desenvolvimento máquina ou halteres",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"6",n:"Rosca scott máquina ou scoth no cabo",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"7",n:"Tríceps corda",d:"Ajuste: 1×4-6 + 1×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"}
+]},
+{id:"l2",label:"Lower 2",title:"Lower 2 — Inferior 2",muscles:"Membros Inferiores (foco posterior)",ex:[
+{id:"1",n:"Flexor sentado",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"2",n:"Flexor deitado",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"3",n:"Elevação de quadril",d:"Aquec: 1-2×10-15 (45-60s) | Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-4min)"},
+{id:"4",n:"Hack",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"},
+{id:"5",n:"Leg 45",d:"Ajuste: 1×4-6 + 1-2×2-4 (90-120s) | Trabalho: 2×6-10 (2-3min)"}
+]}
+]}
+];
+
+function App(){
+const [screen,setScreen]=useState("home");
+const [planId,setPlanId]=useState(null);
+const [dayIdx,setDayIdx]=useState(0);
+const [notes,setNotes]=useState({});
+const [completed,setCompleted]=useState({});
+const [noteCtx,setNoteCtx]=useState(null);
+const [noteText,setNoteText]=useState("");
+const [saving,setSaving]=useState(false);
+
+useEffect(()=>{
+try{const r=localStorage.getItem("wk-notes");if(r)setNotes(JSON.parse(r));}catch(e){}
+try{const r=localStorage.getItem("wk-completed");if(r)setCompleted(JSON.parse(r));}catch(e){}
+},[]);
+
+const plan=PLANS.find(p=>p.id===planId);
+
+function toggleExercise(pid,did,eid){
+const key=`${pid}:${did}:${eid}`;
+const c={...completed};
+c[key]=!c[key];
+setCompleted(c);
+localStorage.setItem("wk-completed",JSON.stringify(c));
+}
+
+function finalizarTreino(){
+if(confirm("Finalizar treino e desmarcar todos os exercícios?")){
+const c={...completed};
+plan.days[dayIdx].ex.forEach(ex=>{
+delete c[`${plan.id}:${plan.days[dayIdx].id}:${ex.id}`];
+});
+setCompleted(c);
+localStorage.setItem("wk-completed",JSON.stringify(c));
+}
+}
+
+function openNote(pid,did,eid,name,desc){
+const key=`${pid}:${did}:${eid}`;
+const parseSeriesFromDescription=(desc)=>{
+const aquecMatch=desc.match(/Aquec:\s*([0-9\-]+)(?:×|\s|$)/);
+const ajusteMatch=desc.match(/Ajuste:\s*([0-9\-]+)(?:×|\s|$)/);
+const trabalhoMatch=desc.match(/Trabalho:\s*([0-9\-]+)(?:×|\s|$)/);
+const getCount=(match)=>{
+if(!match)return 0;
+const nums=match[1].match(/\d+/g);
+if(!nums)return 0;
+return Math.max(...nums.map(Number));
+};
+return {aquecCount:getCount(aquecMatch),ajusteCount:getCount(ajusteMatch),trabalhoCount:getCount(trabalhoMatch)};
+};
+if(!notes[key]){
+const series=parseSeriesFromDescription(desc);
+const newNote={
+aquec:Array(series.aquecCount).fill(null).map(()=>({reps:"",peso:""})),
+ajuste:Array(series.ajusteCount).fill(null).map(()=>({reps:"",peso:""})),
+trabalho:Array(series.trabalhoCount).fill(null).map(()=>({reps:"",peso:""})),
+obs:""
+};
+setNotes(prev=>({...prev,[key]:newNote}));
+}
+setNoteCtx({key,name,desc,series:parseSeriesFromDescription(desc)});
+setScreen("note");
+}
+
+async function saveNote(){
+setSaving(true);
+const noteData={aquec:[],ajuste:[],trabalho:[],obs:document.querySelector(".note-obs")?.value||""};
+const types=["aquec","ajuste","trabalho"];
+types.forEach(type=>{
+let i=0;
+while(document.getElementById(`${type}-reps-${i}`)){
+const reps=document.getElementById(`${type}-reps-${i}`)?.value||"";
+const peso=document.getElementById(`${type}-peso-${i}`)?.value||"";
+if(reps||peso)noteData[type].push({reps,peso});
+i++;
+}
+});
+const n={...notes,[noteCtx.key]:noteData};
+const exerciseName=noteCtx.name;
+PLANS.forEach(plan=>{
+plan.days.forEach(day=>{
+day.ex.forEach(ex=>{
+if(ex.n===exerciseName){
+const key=`${plan.id}:${day.id}:${ex.id}`;
+n[key]=noteData;
+}
+});
+});
+});
+setNotes(n);
+try{localStorage.setItem("wk-notes",JSON.stringify(n));}catch(e){}
+setSaving(false);
+setScreen("plan");
+}
+
+function clearNote(){
+const n={...notes};
+const exerciseName=noteCtx.name;
+PLANS.forEach(plan=>{
+plan.days.forEach(day=>{
+day.ex.forEach(ex=>{
+if(ex.n===exerciseName){
+const key=`${plan.id}:${day.id}:${ex.id}`;
+delete n[key];
+}
+});
+});
+});
+setNotes(n);
+localStorage.setItem("wk-notes",JSON.stringify(n));
+setScreen("plan");
+}
+
+if(screen==="home") return React.createElement("div",{className:"wrapper"},
+React.createElement("div",{className:"header-home"},
+React.createElement("div",{className:"header-title-home"},"TREINO PRO 🔥")
+),
+React.createElement("div",{className:"plans-list"},
+PLANS.map(p=>
+React.createElement("div",{key:p.id,className:"plan-card",onClick:()=>{setPlanId(p.id);setDayIdx(0);setScreen("plan");}},
+React.createElement("div",{className:"plan-icon"},p.icon),
+React.createElement("div",{className:"plan-info"},
+React.createElement("div",{className:"plan-name"},p.name),
+React.createElement("div",{className:"plan-sub"},p.sub),
+React.createElement("span",{className:"plan-freq"},p.freq)
+),
+React.createElement("div",{className:"plan-arrow"},"›")
+)
+)
+));
+
+if(screen==="plan"&&plan){
+const day=plan.days[dayIdx];
+return React.createElement("div",{className:"wrapper"},
+React.createElement("div",{className:"header-plan"},
+React.createElement("button",{className:"back-btn",onClick:()=>setScreen("home")},"‹"),
+React.createElement("div",{className:"header-info"},
+React.createElement("p",{className:"plan-title-header"},plan.name),
+React.createElement("p",{className:"plan-sub-header"},plan.sub)
+)
+),
+React.createElement("div",{className:"schedule-bar"},
+React.createElement("div",{className:"schedule-text"},plan.sched)
+),
+React.createElement("div",{className:"tabs-container"},
+plan.days.map((d,i)=>{
+const active=i===dayIdx;
+return React.createElement("button",{key:d.id,className:`tab ${active?"tab-active":""}`,onClick:()=>setDayIdx(i)},
+d.label
+);
+})
+),
+React.createElement("div",{className:"day-content"},
+React.createElement("div",{className:"day-header"},
+React.createElement("div",{className:"day-title"},day.title),
+React.createElement("div",{className:"day-muscles"},day.muscles)
+),
+day.ex.map((ex,i)=>{
+const key=`${plan.id}:${day.id}:${ex.id}`;
+const hasNote=!!notes[key];
+const isCompleted=!!completed[key];
+return React.createElement("div",{key:ex.id,className:`exercise-item ${isCompleted?"completed":""}`},
+React.createElement("input",{type:"checkbox",className:"ex-checkbox",checked:isCompleted,onChange:()=>toggleExercise(plan.id,day.id,ex.id)}),
+React.createElement("div",{className:"ex-number"},i+1),
+React.createElement("div",{className:"ex-content"},
+React.createElement("div",{className:"ex-name"},ex.n),
+React.createElement("div",{className:"ex-desc"},ex.d)
+),
+React.createElement("button",{className:`note-btn ${hasNote?"active":""}`,onClick:()=>openNote(plan.id,day.id,ex.id,ex.n,ex.d)},
+"📝"
+)
+);
+}),
+React.createElement("div",{className:"day-footer"},
+React.createElement("button",{className:"btn-finalize",onClick:finalizarTreino},"✓ Finalizar Treino")
+)
+)
+);
+}
+
+if(screen==="note"&&noteCtx){
+const renderSeriesSection=(title,type,count,icon)=>{
+if(count===0)return null;
+const data=notes[noteCtx.key]?.[type]||[];
+return React.createElement("div",{style:{marginBottom:"20px"}},
+React.createElement("h3",{style:{color:C.orange,marginBottom:"10px"}},[icon,title].join(" ")),
+Array.from({length:count}).map((_,i)=>
+React.createElement("div",{key:`${type}-${i}`,style:{display:"flex",gap:"10px",marginBottom:"8px"}},
+React.createElement("input",{type:"text",id:`${type}-reps-${i}`,placeholder:"Reps",defaultValue:data[i]?.reps||"",style:{flex:1,padding:"8px",background:C.card,color:C.text,border:`1px solid ${C.border}`,borderRadius:"4px"}}),
+React.createElement("input",{type:"text",id:`${type}-peso-${i}`,placeholder:"kg",defaultValue:data[i]?.peso||"",style:{flex:1,padding:"8px",background:C.card,color:C.text,border:`1px solid ${C.border}`,borderRadius:"4px"}})
+)
+)
+);
+};
+return React.createElement("div",{className:"wrapper"},
+React.createElement("div",{className:"header-plan"},
+React.createElement("button",{className:"back-btn",onClick:()=>setScreen("plan")},"‹"),
+React.createElement("p",{className:"note-header-title"},noteCtx.name)
+),
+React.createElement("div",{className:"note-container"},
+React.createElement("div",{style:{padding:"20px"}},
+renderSeriesSection("Aquecimento","aquec",noteCtx.series.aquecCount,"A"),
+renderSeriesSection("Ajuste","ajuste",noteCtx.series.ajusteCount,"X"),
+renderSeriesSection("Válidas","trabalho",noteCtx.series.trabalhoCount,"V"),
+React.createElement("div",{style:{marginBottom:"20px"}},
+React.createElement("h3",{style:{color:C.orange,marginBottom:"10px"}},"Obs"),
+React.createElement("textarea",{className:"note-obs",style:{width:"100%",height:"100px",padding:"8px",background:C.card,color:C.text,border:`1px solid ${C.border}`,borderRadius:"4px",resize:"none",boxSizing:"border-box"},defaultValue:notes[noteCtx.key]?.obs||"",placeholder:"Digite suas observações..."})
+),
+React.createElement("div",{style:{display:"flex",gap:"10px"}},
+React.createElement("button",{style:{flex:1,padding:"10px",background:C.orange,color:C.bg,border:"none",borderRadius:"4px",cursor:"pointer",fontWeight:"bold"},disabled:saving,onClick:saveNote},saving?"Salvando...":"Salvar"),
+notes[noteCtx.key]&&React.createElement("button",{style:{flex:1,padding:"10px",background:C.orangeD,color:C.text,border:"none",borderRadius:"4px",cursor:"pointer"},onClick:clearNote},"Limpar")
+)
+)
+)
+);
+}
+
+return null;
+}
+
+const root=ReactDOM.createRoot(document.getElementById("app"));
+root.render(React.createElement(App));
+</script>
+</body>
+</html>
+
